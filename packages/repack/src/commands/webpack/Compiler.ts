@@ -47,6 +47,17 @@ export class Compiler implements CompilerInterface {
     // no-op: webpack workers spawn lazily on first getAsset call
   }
 
+  close(callback: (error?: Error | null) => void = () => {}) {
+    void Promise.all(
+      Object.values(this.workers).map((worker) => worker.terminate())
+    ).then(
+      () => callback(),
+      (error: unknown) => {
+        callback(error instanceof Error ? error : new Error(String(error)));
+      }
+    );
+  }
+
   private spawnWorker(platform: string) {
     this.isCompilationInProgress[platform] = true;
 

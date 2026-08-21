@@ -12,6 +12,7 @@ jest.mock('node:worker_threads', () => {
       Object.assign(new EventEmitter(), {
         stdout: new EventEmitter(),
         stderr: new EventEmitter(),
+        terminate: jest.fn(() => Promise.resolve(0)),
       })
     ),
   };
@@ -39,4 +40,33 @@ test('rejects a pending asset request when the worker reports an error', async (
 
   expect(compiler.resolvers.ios).toHaveLength(0);
   await expect(request).rejects.toBe(error);
+});
+
+test('terminates active workers when closed', async () => {
+  const reporter: Reporter = {
+    process: jest.fn(),
+    flush: jest.fn(),
+    stop: jest.fn(),
+  };
+  const compiler = new Compiler(
+    ['ios'],
+    { host: '' },
+    reporter,
+    '/project',
+    '/react-native'
+  );
+  const worker = new Worker('worker.js');
+  compiler.workers.ios = worker;
+
+  await new Promise<void>((resolve, reject) => {
+    compiler.close((error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+
+  expect(worker.terminate).toHaveBeenCalledTimes(1);
 });

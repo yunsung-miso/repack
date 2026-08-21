@@ -111,6 +111,7 @@ export interface CompilerInterface {
   statsCache: Record<string, unknown>;
   setDevServerContext(ctx: Server.DelegateContext): void;
   start(): void;
+  close(callback?: (error?: Error | null) => void): void;
   getAsset(
     filename: string,
     platform: string,
