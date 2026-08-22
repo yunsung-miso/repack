@@ -40,7 +40,7 @@ describe('lazy compilation', () => {
       webpackConfig: path.join(__dirname, 'configs', './rspack.config.mjs'),
     };
 
-    // @ts-ignore
+    // @ts-expect-error
     const { stop } = await startCommand.func([], config, args);
     stopServer = stop;
   });
